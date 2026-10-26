@@ -1,14 +1,12 @@
+import { CalendarDays, House, UserRound } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/format";
 
 export const SCREENS = {
-  "m-home-scroll": { w: 780, h: 2520 },
-  "m-nav": { w: 780, h: 130 },
+  "m-home-scroll": { w: 780, h: 2714 },
   "m-home": { w: 780, h: 1688 },
   "m-confirm": { w: 780, h: 1688 },
   "m-booking": { w: 780, h: 1688 },
-  "m-bookings": { w: 780, h: 2724 },
-  "m-login": { w: 780, h: 1688 },
   "d-dashboard": { w: 2049, h: 1230 },
   "d-schedule": { w: 2049, h: 1230 },
   "d-lock": { w: 2049, h: 1230 },
@@ -63,23 +61,83 @@ export function Crop({
   );
 }
 
+/** A length in the app's 390px-wide screen, scaled to the phone screen it is drawn in. */
+const u = (px: number) => `calc(${px} * 100cqw / 390)`;
+
+const APP_TABS = [
+  { label: "خانه", icon: House, active: true },
+  { label: "رزروهای من", icon: CalendarDays, active: false },
+  { label: "پروفایل", icon: UserRound, active: false },
+];
+
+/**
+ * The booking app's floating glass tab bar, drawn live over a scrolling screenshot so its
+ * glass really blurs the page passing under it. Geometry copies the app (390px screen:
+ * 12px side margins, 16px from the bottom, 62px tall, 6px padding, «خانه» selected).
+ */
+function AppTabBar() {
+  const BAR_W = 366;
+  const lens = { x: 242, y: 6, w: 118, h: 50 };
+  const d = lens.h;
+  const dot = "radial-gradient(circle closest-side, #000 98%, transparent)";
+  const fill = "linear-gradient(#000 0 0)";
+  const images = [fill, fill, dot, dot].join(", ");
+  const sizes = `100% 100%, ${u(lens.w - d)} ${u(d)}, ${u(d)} ${u(d)}, ${u(d)} ${u(d)}`;
+  const positions = `0 0, ${u(lens.x + d / 2)} ${u(lens.y)}, ${u(lens.x)} ${u(lens.y)}, ${u(lens.x + lens.w - d)} ${u(lens.y)}`;
+  const hole: React.CSSProperties = {
+    maskImage: images,
+    WebkitMaskImage: images,
+    maskSize: sizes,
+    WebkitMaskSize: sizes,
+    maskPosition: positions,
+    WebkitMaskPosition: positions,
+    maskRepeat: "no-repeat",
+    WebkitMaskRepeat: "no-repeat",
+    maskComposite: "subtract, add, add, add",
+    WebkitMaskComposite: "source-out, source-over, source-over, source-over",
+  };
+
+  return (
+    <div
+      aria-hidden
+      className="liquid-bar absolute rounded-full"
+      style={{ left: u(12), bottom: u(16), width: u(BAR_W), height: u(62), padding: u(6) }}
+    >
+      <div className="liquid-surface" style={hole} />
+      <span className="liquid-lens absolute rounded-full" style={{ left: u(lens.x), top: u(lens.y), width: u(lens.w), height: u(lens.h) }} />
+      <div className="relative grid h-full grid-cols-3">
+        {APP_TABS.map(({ label, icon: Icon, active }) => (
+          <span
+            key={label}
+            className={cn("relative z-10 flex flex-col items-center justify-center leading-tight", active ? "font-bold text-primary" : "font-medium text-slate-600")}
+            style={{ fontSize: u(11), gap: u(2) }}
+          >
+            <Icon style={{ width: u(20), height: u(20) }} strokeWidth={active ? 2.3 : 1.8} />
+            {label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /**
  * A phone body around a customer-side screenshot: a status bar with the camera island, then
- * the app's 390×844 screen. With `scroll`, a tall screenshot scrolls inside the screen; a
- * `bottomBar` stays pinned to the bottom of the screen above it, like the app's own tab bar.
+ * the app's 390×844 screen. With `scroll`, a tall screenshot scrolls inside the screen; with
+ * `tabBar`, the app's glass tab bar floats over it (for screenshots taken without it).
  */
 export function PhoneFrame({
   name,
   alt,
   scroll,
-  bottomBar,
+  tabBar,
   className,
   priority,
 }: {
   name: ScreenName;
   alt: string;
   scroll?: boolean;
-  bottomBar?: ScreenName;
+  tabBar?: boolean;
   className?: string;
   priority?: boolean;
 }) {
@@ -89,13 +147,9 @@ export function PhoneFrame({
         <div className="relative aspect-[390/40]" aria-hidden>
           <span className="absolute top-[22%] left-1/2 h-[52%] w-[30%] -translate-x-1/2 rounded-full bg-slate-900" />
         </div>
-        <div className="relative aspect-[390/844] overflow-hidden">
+        <div className="relative aspect-[390/844] overflow-hidden [container-type:inline-size]">
           <Screen name={name} alt={alt} priority={priority} className={scroll ? "phone-scroll" : undefined} />
-          {bottomBar && (
-            <div className="absolute inset-x-0 bottom-0">
-              <Screen name={bottomBar} alt="" />
-            </div>
-          )}
+          {tabBar && <AppTabBar />}
         </div>
       </div>
     </div>

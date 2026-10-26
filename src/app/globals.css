@@ -106,8 +106,8 @@
 }
 
 /* The phone in the hero scrolls through the customer page by itself.
-   Stops where the end of the page meets the pinned tab bar:
-   (content 2520 − (screen 1688 − tab bar 130)) / 2520 = 38.2% of the screenshot. */
+   Stops at the end of the page, whose bottom padding sits under the floating tab bar:
+   (screenshot 2714 − screen 1688) / 2714 = 37.8% of the screenshot. */
 @keyframes phone-scroll {
   0%,
   14% {
@@ -115,7 +115,7 @@
   }
   46%,
   62% {
-    transform: translateY(-38.2%);
+    transform: translateY(-37.8%);
   }
   92%,
   100% {
