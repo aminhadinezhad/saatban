@@ -1,3 +1,4 @@
+import { BackToTop } from "@/components/back-to-top";
 import { BottomNav } from "@/components/bottom-nav";
 import { BeforeAfter } from "@/components/sections/before-after";
 import { Contact } from "@/components/sections/contact";
@@ -30,6 +31,7 @@ export default function HomePage() {
       </main>
       <Footer />
       <BottomNav />
+      <BackToTop />
     </>
   );
 }

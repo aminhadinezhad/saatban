@@ -69,7 +69,7 @@ export function Hero() {
             priority
           />
           <div className="relative mx-auto w-[64%] max-w-[270px] md:absolute md:-bottom-16 md:-left-6 md:w-[44%]">
-            <PhoneFrame name="m-home-full" alt="صفحه رزرو مشتری: تقویم شمسی و ساعت‌های آزاد" scroll priority />
+            <PhoneFrame name="m-home-scroll" bottomBar="m-nav" alt="صفحه رزرو مشتری: تقویم شمسی و ساعت‌های آزاد" scroll priority />
           </div>
 
           <div className="float absolute top-[8%] -right-1 flex items-center gap-2.5 rounded-2xl border border-white bg-white/95 py-2.5 pr-2.5 pl-4 shadow-[0_16px_40px_-14px_rgb(15_23_42/0.35)] backdrop-blur md:top-auto md:-right-6 md:bottom-[18%]">

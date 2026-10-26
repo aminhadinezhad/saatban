@@ -2,7 +2,8 @@ import Image from "next/image";
 import { cn } from "@/lib/format";
 
 export const SCREENS = {
-  "m-home-full": { w: 780, h: 2650 },
+  "m-home-scroll": { w: 780, h: 2520 },
+  "m-nav": { w: 780, h: 130 },
   "m-home": { w: 780, h: 1688 },
   "m-confirm": { w: 780, h: 1688 },
   "m-booking": { w: 780, h: 1688 },
@@ -62,27 +63,40 @@ export function Crop({
   );
 }
 
-/** A phone body around a customer-side screenshot. With `scroll`, a tall screenshot scrolls inside it. */
+/**
+ * A phone body around a customer-side screenshot: a status bar with the camera island, then
+ * the app's 390×844 screen. With `scroll`, a tall screenshot scrolls inside the screen; a
+ * `bottomBar` stays pinned to the bottom of the screen above it, like the app's own tab bar.
+ */
 export function PhoneFrame({
   name,
   alt,
   scroll,
+  bottomBar,
   className,
   priority,
 }: {
   name: ScreenName;
   alt: string;
   scroll?: boolean;
+  bottomBar?: ScreenName;
   className?: string;
   priority?: boolean;
 }) {
   return (
     <div className={cn("relative rounded-[2.6rem] bg-slate-900 p-[9px] shadow-[0_30px_60px_-20px_rgb(15_23_42/0.45)] ring-1 ring-slate-700/60", className)}>
-      <div className="relative aspect-[390/844] overflow-hidden rounded-[2.05rem] bg-background pt-[9%]">
-        <Screen name={name} alt={alt} priority={priority} className={scroll ? "phone-scroll" : undefined} />
-        {/* status bar with the camera island, above the screenshot */}
-        <span className="absolute inset-x-0 top-0 h-[9%] bg-background" aria-hidden />
-        <span className="absolute top-[2.2%] left-1/2 h-[3.4%] w-[30%] -translate-x-1/2 rounded-full bg-slate-900" aria-hidden />
+      <div className="overflow-hidden rounded-[2.05rem] bg-background">
+        <div className="relative aspect-[390/40]" aria-hidden>
+          <span className="absolute top-[22%] left-1/2 h-[52%] w-[30%] -translate-x-1/2 rounded-full bg-slate-900" />
+        </div>
+        <div className="relative aspect-[390/844] overflow-hidden">
+          <Screen name={name} alt={alt} priority={priority} className={scroll ? "phone-scroll" : undefined} />
+          {bottomBar && (
+            <div className="absolute inset-x-0 bottom-0">
+              <Screen name={bottomBar} alt="" />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
