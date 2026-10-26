@@ -17,7 +17,10 @@ export function Logo({ className, light }: { className?: string; light?: boolean
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <LogoMark />
-      <span className={cn("text-xl font-black tracking-tight", light ? "text-white" : "text-foreground")}>{BRAND.name}</span>
+      {/* inside liquid glass, follows its tone; elsewhere the normal text colour */}
+      <span className={cn("text-xl font-black tracking-tight transition-colors duration-300", light ? "text-white" : "text-[var(--fg-strong,var(--foreground))]")}>
+        {BRAND.name}
+      </span>
     </span>
   );
 }

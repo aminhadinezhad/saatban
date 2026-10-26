@@ -4,7 +4,10 @@ import * as React from "react";
 import { NAV, type SectionId } from "@/content/site";
 
 /**
- * The section crossing the middle of the screen, shared by the header and the bottom bar.
+ * The section you are reading, shared by the header and the bottom bar: the last menu
+ * section whose top has passed the upper third of the screen (sections without a menu item,
+ * like the FAQ, count as part of the one before them). At the very end of the page the last
+ * section is selected even if it is too short to reach that line.
  *
  * When an in-page link is clicked, the smooth scroll passes over the sections in between.
  * To keep the highlight from flickering through them, the destination is selected at once
@@ -28,14 +31,19 @@ function setActive(id: SectionId) {
   for (const listener of listeners) listener();
 }
 
-/** The tracked section under the middle band of the screen, if any. */
-function sectionAtMiddle(): SectionId | null {
-  const y = window.innerHeight * 0.475;
-  for (const id of IDS) {
-    const rect = document.getElementById(id)?.getBoundingClientRect();
-    if (rect && rect.top <= y && rect.bottom >= y) return id as SectionId;
+/** Where a section counts as "reached": a third of the way down the screen. */
+const READ_LINE = 0.3;
+
+function currentSection(): SectionId {
+  const root = document.documentElement;
+  if (window.scrollY + window.innerHeight >= root.scrollHeight - 4) return NAV[NAV.length - 1]!.id;
+  const line = window.innerHeight * READ_LINE;
+  let current: SectionId = NAV[0]!.id;
+  for (const { id } of NAV) {
+    const el = document.getElementById(id);
+    if (el && el.getBoundingClientRect().top <= line) current = id;
   }
-  return null;
+  return current;
 }
 
 /** True once a scroll to `id` is over: its top sits under the header, or the page cannot scroll further. */
@@ -61,14 +69,9 @@ function lockTo(id: SectionId) {
     clearTimeout(timer);
     locked = false;
     cancelLock = null;
-    if (!settled) return;
-    // The user may have stopped the scroll on the way (e.g. with a finger): if the destination
-    // is not on screen, follow what is actually there instead.
-    const rect = document.getElementById(id)?.getBoundingClientRect();
-    if (rect && (rect.bottom <= 0 || rect.top >= window.innerHeight)) {
-      const here = sectionAtMiddle();
-      if (here) setActive(here);
-    }
+    // Normally this is the destination itself; if the user stopped the scroll on the way
+    // (e.g. with a finger), it is wherever they actually are.
+    if (settled) setActive(currentSection());
   };
   const onScroll = () => {
     clearTimeout(timer);
@@ -85,20 +88,18 @@ function lockTo(id: SectionId) {
 }
 
 function startTracking() {
-  // The observer only says *when* to look; what is selected comes from the layout at that
-  // moment, so a callback delivered late can never select a section that has already passed.
-  const observer = new IntersectionObserver(
-    () => {
-      if (locked) return;
-      const here = sectionAtMiddle();
-      if (here) setActive(here);
-    },
-    { rootMargin: "-45% 0px -50% 0px" },
-  );
-  for (const id of IDS) {
-    const el = document.getElementById(id);
-    if (el) observer.observe(el);
-  }
+  // Read the layout once per frame while scrolling or resizing.
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    if (!locked) setActive(currentSection());
+  };
+  const schedule = () => {
+    if (!frame) frame = requestAnimationFrame(update);
+  };
+  window.addEventListener("scroll", schedule, { passive: true });
+  window.addEventListener("resize", schedule);
+  update();
 
   // Any link to a tracked section (menus, hero buttons, pricing buttons...) locks the highlight.
   const onClick = (event: MouseEvent) => {
@@ -109,7 +110,9 @@ function startTracking() {
   document.addEventListener("click", onClick, true);
 
   return () => {
-    observer.disconnect();
+    cancelAnimationFrame(frame);
+    window.removeEventListener("scroll", schedule);
+    window.removeEventListener("resize", schedule);
     document.removeEventListener("click", onClick, true);
     cancelLock?.();
   };

@@ -4,7 +4,7 @@ import { CONTACT } from "@/content/site";
 export function Contact() {
   return (
     <section id="contact" className="mx-auto max-w-6xl px-4 pb-16 md:px-6 md:pb-24">
-      <div className="rise relative overflow-hidden rounded-[2rem] bg-primary px-6 py-14 text-white md:px-14 md:py-20">
+      <div data-surface="dark" className="rise relative overflow-hidden rounded-[2rem] bg-primary px-6 py-14 text-white md:px-14 md:py-20">
         <div className="grid-paper grid-paper-light pointer-events-none absolute inset-0" aria-hidden />
         {/* a large, faint clock face in the corner */}
         <svg viewBox="0 0 200 200" className="pointer-events-none absolute -bottom-24 -left-20 size-[22rem] text-white/10" aria-hidden>

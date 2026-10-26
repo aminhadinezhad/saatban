@@ -25,7 +25,7 @@ const POINTS = [
 
 export function Trust() {
   return (
-    <section className="relative overflow-hidden bg-navy-deep py-20 text-white md:py-28">
+    <section data-surface="dark" className="relative overflow-hidden bg-navy-deep py-20 text-white md:py-28">
       <div className="grid-paper grid-paper-light pointer-events-none absolute inset-0" aria-hidden />
       <div className="relative mx-auto max-w-6xl px-4 md:px-6">
         <div className="rise grid gap-6 md:grid-cols-[1fr_1.4fr] md:items-end">
